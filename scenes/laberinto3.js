@@ -1,4 +1,4 @@
-export default class Game extends Phaser.Scene {
+export default class laberinto3 extends Phaser.Scene {
     constructor() {
         super('laberinto3');
     }
@@ -18,13 +18,14 @@ export default class Game extends Phaser.Scene {
 
     create() {
         const map = this.make.tilemap({ key: 'mapa3' });
-        const tileset = map.addTilesetImage('tilemap', 'tilemap');
+        //const tileset = map.addTilesetImage('paredlaberinto3', 'tilemap');
+        const tileset = map.addTilesetImage('fondolaberinto', 'tilemap');
         const layer = map.createLayer('plataforma', tileset, 0, 0);
         layer.setCollisionByProperty({ colision: true });
 
-        const spawnPoint = map.findObject('objetos', obj => obj.name === 'player');
+        const spawnPoint = map.findObject('objetos', obj => obj.name === 'Player');
         this.fantasma = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, 'fantasma');
-        this.fantasma.setCollideWorldBounds(true);
+        this.fantasma.setCollideWorldBounds(false);
         this.physics.add.collider(this.fantasma, layer);
 
         this.physics.world.setBounds(0, 0, 3840, 800);
@@ -52,28 +53,24 @@ export default class Game extends Phaser.Scene {
             fill: '#FFD700'
         });
 
-        // Enemigos
         this.enemigos = this.physics.add.group();
         this.physics.add.collider(this.enemigos, layer);
 
-        // Crear enemigos
         map.getObjectLayer('objetos').objects.forEach(obj => {
             if (obj.name === 'enemigo') {
                 const enemigo = this.enemigos.create(obj.x, obj.y - obj.height, 'cruzmadera');
                 enemigo.setCollideWorldBounds(true);
                 enemigo.body.setAllowGravity(false);
-                enemigo.setVelocityY(100); // velocidad inicial hacia abajo
-                enemigo.body.setBounce(1, 1); // rebote al colisionar
+                enemigo.setVelocityY(100);
+                enemigo.body.setBounce(1, 1);
                 enemigo.setScale(1.5);
             }
         });
 
-        // Colisión entre enemigos y paredes, con rebote invertido manual
         this.physics.add.collider(this.enemigos, layer, (enemigo, tile) => {
             enemigo.body.velocity.y *= -1;
         });
 
-        // Colisión con jugador
         this.physics.add.overlap(this.fantasma, this.enemigos, () => {
             const spawnPoint = map.findObject('objetos', obj => obj.name === 'player');
             this.fantasma.setPosition(spawnPoint.x, spawnPoint.y);
@@ -109,6 +106,8 @@ export default class Game extends Phaser.Scene {
         this.uiCamera.ignore(this.Cruces.getChildren());
         this.cameras.main.ignore([this.itemText, this.mensajeTexto]);
 
+        this.kKey = this.input.keyboard.addKey('K');
+
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
@@ -116,6 +115,10 @@ export default class Game extends Phaser.Scene {
     update() {
         const speed = 300;
         this.fantasma.body.setVelocity(0);
+
+        if (Phaser.Input.Keyboard.JustDown(this.kKey)) {
+    this.scene.start('victoria');
+}
 
         if (this.cursors.left.isDown) {
             this.fantasma.body.setVelocityX(-speed);

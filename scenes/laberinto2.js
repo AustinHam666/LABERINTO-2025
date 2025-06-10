@@ -1,4 +1,4 @@
-export default class Game extends Phaser.Scene {
+export default class laberinto2 extends Phaser.Scene {
     constructor() {
         super('laberinto2');
     }
@@ -20,18 +20,29 @@ export default class Game extends Phaser.Scene {
     create() {
         const map = this.make.tilemap({ key: 'mapa2' });
         console.log('Mapa:', map);
-        const tileset = map.addTilesetImage('paredlaberinto2', 'tilemap');
-        const tileset2 = map.addTilesetImage('fondolaberinto', 'tilemap'); 
+        const tileset = map.addTilesetImage('paredlaberinto2', 'tilemap'); 
+        const tileset2 = map.addTilesetImage('fondolaberinto', 'tilemap');
     
         const layer = map.createLayer('plataforma', tileset, 0, 0);
         layer.setCollisionByProperty({ colision: true });
 
+        // Activa el renderizado de debug para Arcade Physics
+ /*this.physics.world.createDebugGraphic();
+this.physics.world.drawDebug = false;
+
+// Opcional: haz que la capa de colisiones también muestre debug
+layer.renderDebug(this.add.graphics(), {
+    tileColor: null, // Color de tiles sin colisión
+    collidingTileColor: new Phaser.Display.Color(243, 134, 48, 200), // Color de tiles con colisión
+    faceColor: new Phaser.Display.Color(10, 24, 7, 255) // Color de las caras de colisión
+});*/
+
         const spawnPoint = map.findObject('objetos', obj => obj.name === 'player');
         this.fantasma = this.physics.add.sprite(spawnPoint.x, spawnPoint.y, 'fantasma');
-        this.fantasma.setCollideWorldBounds(true);
+        this.fantasma.setCollideWorldBounds(false);
         this.physics.add.collider(this.fantasma, layer);
-
         this.physics.world.setBounds(0, 0, 3840, 800);
+
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.startFollow(this.fantasma);
         this.cameras.main.setZoom(3);
@@ -66,25 +77,23 @@ export default class Game extends Phaser.Scene {
                 const enemigo = this.enemigos.create(obj.x, obj.y - obj.height, 'cruzmadera');
                 enemigo.setCollideWorldBounds(true);
                 enemigo.body.setAllowGravity(false);
-                enemigo.setVelocityY(100); // velocidad inicial hacia abajo
-                enemigo.body.setBounce(1, 1); // rebote al colisionar
+                enemigo.setVelocityY(100);
+                enemigo.body.setBounce(1, 1);
                 enemigo.setScale(1.5);
             }
         });
 
-        // Colisión entre enemigos y paredes, con rebote invertido manual
+
         this.physics.add.collider(this.enemigos, layer, (enemigo, tile) => {
             enemigo.body.velocity.y *= -1;
         });
 
-        // Colisión con jugador
         this.physics.add.overlap(this.fantasma, this.enemigos, () => {
             const spawnPoint = map.findObject('objetos', obj => obj.name === 'player');
             this.fantasma.setPosition(spawnPoint.x, spawnPoint.y);
         }, null, this);
 
-
-        const portalObj = map.findObject('objetos', obj => obj.name === 'Portal');
+        const portalObj = map.findObject('objetos', obj => obj.name === 'portal');
         this.portal = this.physics.add.sprite(portalObj.x, portalObj.y - portalObj.height, 'portal');
         this.portal.setImmovable(true);
         this.portal.body.setAllowGravity(false);
@@ -109,10 +118,13 @@ export default class Game extends Phaser.Scene {
         });
 
         this.uiCamera = this.cameras.add(0, 0, this.game.config.width, this.game.config.height);
-        this.uiCamera.ignore([layer, this.fantasma]);
-        this.cameras.main.ignore([this.itemText]);
-        this.uiCamera.ignore(this.Cruces.getChildren());
+        this.uiCamera.ignore([layer, this.fantasma, this.Cruces, this.portal, this.enemigos]);
+        //this.uiCamera.ignore([layer, this.fantasma]);
+        //this.cameras.main.ignore([this.itemText]);
+        //this.uiCamera.ignore(this.Cruces.getChildren());
         this.cameras.main.ignore([this.itemText, this.mensajeTexto]);
+        
+        this.kKey = this.input.keyboard.addKey('K');
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -120,6 +132,10 @@ export default class Game extends Phaser.Scene {
     update() {
         const speed = 300;
         this.fantasma.body.setVelocity(0);
+
+        if (Phaser.Input.Keyboard.JustDown(this.kKey)) {
+    this.scene.start('laberinto3');
+}
 
         if (this.cursors.left.isDown) {
             this.fantasma.body.setVelocityX(-speed);

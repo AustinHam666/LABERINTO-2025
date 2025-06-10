@@ -27,8 +27,8 @@ var config = {
       debug: false,
     },
   },
-  // Listado de todas las escenas del juego, en orden
-  scene: [laberinto2, laberinto3, victoria],
+
+  scene: [laberinto1, laberinto2, laberinto3, victoria],
 };
 
 var game = new Phaser.Game(config);

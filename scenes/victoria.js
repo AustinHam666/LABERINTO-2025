@@ -4,17 +4,14 @@ export default class Game extends Phaser.Scene {
     }
 
     preload() {
-        // no se necesita cargar nada
     }
 
     create(data) {
         const total = data.totalItems || 0;
 
-        // Fondo color bordo
         this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x4B0082).setOrigin(0);
 
-        // Texto final
-        this.add.text(this.scale.width / 2, this.scale.height / 2, `¡Ganaste!\nTotal de ítems recolectados: ${total}`, {
+        this.add.text(this.scale.width / 2, this.scale.height / 2, `Victoria\nTotal de cruces recolectadas: ${total}`, {
             fontFamily: '"Press Start 2P"',
             fontSize: '30px',
             color: '#FFFFFF',
